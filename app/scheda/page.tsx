@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-interface Scheda {
-  timeStamp: Date;
-  nome: string;
-  giovaneGirasole: string[];
-  vecchiaQuercia: string[];
-  deneb: string[];
-  sanAvogaro: string[];
-  avalance: string[];
-  k2: string[];
-}
+
+// interface Scheda {
+//   timeStamp: Date;
+//   nome: string;
+//   giovaneGirasole: string[];
+//   vecchiaQuercia: string[];
+//   deneb: string[];
+//   sanAvogaro: string[];
+//   avalance: string[];
+//   k2: string[];
+// }
 
 // TODO: aggiungere animali e aggettivi
 
