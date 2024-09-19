@@ -13,8 +13,9 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       maxWidth: {
-        '100': '30rem'
-      }
+        "100": "30rem",
+        "75%": "75%",
+      },
     },
   },
   plugins: [],
