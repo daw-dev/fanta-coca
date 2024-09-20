@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Scheda",
+  "description": "Definisce come deve essere strutturata una scheda",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "title": "Nome",
+      "description": "Nome di chi ha inviato la scheda",
+      "type": "string",
+      "pattern": "^\\w.*\\w$"
+    },
+    "timeStamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "guesses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "staffName": {
+            "type": "string"
+          },
+          "capi": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "minProperties": 2
+      }
+    }
+  },
+  "minProperties": 3
+}
