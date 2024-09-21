@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { Scheda, StaffGuess } from "./page";
+import { useRouter } from "next/navigation";
 
 // TODO: aggiungere animali e aggettivi
 // TODO: maschile e femminile
@@ -54,27 +56,38 @@ interface SchedaPageProps {
 }
 
 export default function SchedaPage(props: SchedaPageProps) {
+
   const [nome, setNome] = useState(getNomeDefault);
   const [guesses, setGuesses] = useState<StaffGuess[]>(() =>
     getDefaultGuesses(props.staffs)
   );
   const [schedaInviata, setSchedaInviata] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const schedaInviata = localStorage.getItem("scheda");
+    if (schedaInviata) {
+      router.push(`/scheda/${schedaInviata}`);
+    }
+  },[]);
 
   return (
-    <div className="grid grid-rows-[50px_1fr_1fr_1fr_1fr_1fr_1fr_40px_50px] md:grid-rows-[50px_1fr_1fr_1fr_40px_50px] md:grid-cols-2 min-h-screen p-10 justify-items-center items-center gap-y-5 gap-x-10">
-      <span className="text-3xl md:col-span-2">Scheda Fanta-CoCa</span>
-      {guesses.map((guess, index) => (
-        <Staff
-          key={index}
-          schedaInviata={schedaInviata}
-          nomeStaff={guess.nomeStaff}
-          onGuessChange={(capi) => {
-            guess.capi = capi;
-            setGuesses([...guesses]);
-          }}
-        />
-      ))}
-      <span className="md:col-span-2 w-full max-w-75%">
+    <div className="flex flex-col items-center gap-3 w-screen p-8">
+      <span className="text-3xl w-full text-center">Scheda Fanta-CoCa</span>
+      <div className="w-full grid auto-rows-min grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center items-center gap-y-5 gap-x-10">
+        {guesses.map((guess, index) => (
+          <Staff
+            key={index}
+            schedaInviata={schedaInviata}
+            nomeStaff={guess.nomeStaff}
+            onGuessChange={(capi) => {
+              guess.capi = capi;
+              setGuesses([...guesses]);
+            }}
+          />
+        ))}
+      </div>
+      <span className="md:col-span-2 lg:col-span-3 w-full max-w-75%">
         <label htmlFor="nome">Inserire il tuo nome:</label>
         <input
           id="nome"
@@ -87,17 +100,29 @@ export default function SchedaPage(props: SchedaPageProps) {
         />
       </span>
       <button
-        className="md:col-span-2 p-2 w-full max-w-75% bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
+        className="cool-button md:col-span-2 lg:col-span-3"
         disabled={schedaInviata}
         onClick={() => {
           const scheda = creaScheda(nome, guesses);
+          if (scheda.guesses.some((guess) => guess.capi.length === 0)) {
+            toast("Inserire almeno un capo per ogni staff!", {
+              type: "error",
+            });
+            return;
+          }
           setSchedaInviata(true);
           fetch("api/nuova-scheda", {
             method: "POST",
             body: JSON.stringify(scheda),
-          }).then((response) => {
+          }).then(async (response) => {
             if (!response.ok) {
               setSchedaInviata(false);
+              toast("Errore nell'invio della scheda!", { type: "error" });
+            } else {
+              toast("Scheda inviata con successo!", { type: "success" });
+              const json = await response.json();
+              localStorage.setItem("scheda", json.insertedId);
+              router.push(`/scheda/${json.insertedId}`);
             }
           });
         }}
@@ -122,7 +147,7 @@ function Staff(props: StaffProps) {
   const newCapoRef = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-3 w-full text-center items-center bg-white bg-opacity-10 py-10 px-5 h-full justify-center rounded-md">
-      <span>{props.nomeStaff}</span>
+      <span className="text-xl">{props.nomeStaff}</span>
       {capi.map((capo, index) => (
         <input
           className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
@@ -146,7 +171,8 @@ function Staff(props: StaffProps) {
         className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
         placeholder="Scrivi qui per inserire un nuovo capo..."
         onChange={(evt) => {
-          if (evt.target.value.trim()) setCapi((capi) => [...capi, evt.target.value]);
+          if (evt.target.value.trim())
+            setCapi((capi) => [...capi, evt.target.value]);
         }}
         value=""
         ref={newCapoRef}

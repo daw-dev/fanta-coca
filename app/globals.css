@@ -20,6 +20,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.cool-button {
+  @apply p-3 w-full max-w-lg text-center text-lg bg-white text-black rounded-md 
+  hover:bg-gray-200 hover:text-gray-800 hover:rounded-xl 
+  transition-all duration-300 ease-in-out;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

@@ -9,16 +9,10 @@ export default function Home() {
       </span>
       <main className="flex flex-col gap-8 row-start-2 items-center w-full justify-center">
         <span>Work is still in progress...</span>
-        <Link
-          href={"scheda"}
-          className="p-5 w-full max-w-100 text-center text-lg bg-white text-black rounded-md hover:rounded-3xl transition-[border-radius]"
-        >
+        <Link href={"scheda"} className="cool-button">
           Invia la tua scheda
         </Link>
-        <Link
-          href={"risultati"}
-          className="p-5 w-full max-w-100 text-center text-lg bg-white text-black rounded-md hover:rounded-3xl transition-[border-radius]"
-        >
+        <Link href={"risultati"} className="cool-button">
           Guarda i risultati
         </Link>
       </main>
@@ -33,7 +27,7 @@ export default function Home() {
             )
           </span>
         </span>
-        <span>21/07/2024</span>
+        <span>21/09/2024</span>
       </footer>
     </div>
   );

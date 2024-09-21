@@ -1,5 +1,6 @@
 import { connectToDatabase } from "@/lib/mongodb";
 import SchedaPage from "./pageDetails";
+import { redirect } from "next/navigation";
 
 export interface Scheda {
   timeStamp: Date;
