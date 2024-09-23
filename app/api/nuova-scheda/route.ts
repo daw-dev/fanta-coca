@@ -3,7 +3,7 @@ import schemaScheda from "@/utils/schema-scheda.json";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import { connectToDatabase } from "@/lib/mongodb";
-import { Scheda } from "@/app/scheda/page";
+import { Scheda } from "@/lib/types";
 
 const ajv = new Ajv();
 addFormats(ajv);

@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Scheda, StaffGuess } from "./page";
-import { useRouter } from "next/navigation";
+import { Scheda, Staff } from "@/lib/types";
 
 // TODO: aggiungere animali e aggettivi
 // TODO: maschile e femminile
@@ -39,50 +38,63 @@ function getNomeDefault() {
   }`;
 }
 
-function getDefaultGuesses(staffNames: string[]): StaffGuess[] {
-  return staffNames.map((staff) => ({ nomeStaff: staff, capi: [] }));
-}
-
-function creaScheda(nome: string, guesses: StaffGuess[]): Scheda {
-  return {
-    timeStamp: new Date(),
-    nome,
-    guesses,
-  };
-}
-
 interface SchedaPageProps {
   staffs: string[];
 }
 
 export default function SchedaPage(props: SchedaPageProps) {
-
-  const [nome, setNome] = useState(getNomeDefault);
-  const [guesses, setGuesses] = useState<StaffGuess[]>(() =>
-    getDefaultGuesses(props.staffs)
-  );
-  const [schedaInviata, setSchedaInviata] = useState(false);
-  const router = useRouter();
+  const [loaded, setLoaded] = useState(false);
+  const [scheda, setScheda] = useState<Scheda>(() => ({
+    nome: getNomeDefault(),
+    staffs: props.staffs.map((staff) => ({ nomeStaff: staff, capi: [] })),
+  }));
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const schedaInviata = localStorage.getItem("scheda");
-    if (schedaInviata) {
-      router.push(`/scheda/${schedaInviata}`);
+    if (schedaInviata) { 
+      fetch(`/api/scheda/${schedaInviata}`).then(async (response) => {
+        if (!response.ok) {
+          setLoaded(true);
+          localStorage.removeItem("scheda");
+          return;
+        }
+        const schedaDb = await response.json();
+        const scheda: Scheda = {
+          ...schedaDb,
+          timeStamp: new Date(schedaDb.timeStamp),
+        };
+        if (scheda.timeStamp!.getFullYear() < new Date().getFullYear()) {
+          localStorage.removeItem("scheda");
+        } else {
+          setScheda(scheda);
+        }
+        setLoaded(true);
+      });
+    } else {
+      setLoaded(true);
     }
-  },[]);
+  }, []);
+
+  if (!loaded)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="text-5xl">Caricamento...</span>
+      </div>
+    );
 
   return (
     <div className="flex flex-col items-center gap-3 w-screen p-8">
       <span className="text-3xl w-full text-center">Scheda Fanta-CoCa</span>
       <div className="w-full grid auto-rows-min grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center items-center gap-y-5 gap-x-10">
-        {guesses.map((guess, index) => (
-          <Staff
+        {scheda.staffs.map((staff, index) => (
+          <StaffViewer
             key={index}
-            schedaInviata={schedaInviata}
-            nomeStaff={guess.nomeStaff}
+            staff={staff}
             onGuessChange={(capi) => {
-              guess.capi = capi;
-              setGuesses([...guesses]);
+              staff.capi = capi;
+              scheda.staffs[index].capi = capi;
+              setScheda({ ...scheda });
             }}
           />
         ))}
@@ -94,60 +106,79 @@ export default function SchedaPage(props: SchedaPageProps) {
           className="p-2 w-full bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
           placeholder="Nome..."
           onChange={(evt) => {
-            setNome(evt.target.value);
+            setScheda({ ...scheda, nome: evt.target.value });
           }}
-          value={nome}
+          value={scheda.nome}
         />
       </span>
       <button
         className="cool-button md:col-span-2 lg:col-span-3"
-        disabled={schedaInviata}
         onClick={() => {
-          const scheda = creaScheda(nome, guesses);
-          if (scheda.guesses.some((guess) => guess.capi.length === 0)) {
+          if (scheda.staffs.some((guess) => guess.capi.length === 0)) {
             toast("Inserire almeno un capo per ogni staff!", {
               type: "error",
             });
             return;
           }
-          setSchedaInviata(true);
-          fetch("api/nuova-scheda", {
-            method: "POST",
-            body: JSON.stringify(scheda),
-          }).then(async (response) => {
-            if (!response.ok) {
-              setSchedaInviata(false);
-              toast("Errore nell'invio della scheda!", { type: "error" });
-            } else {
-              toast("Scheda inviata con successo!", { type: "success" });
-              const json = await response.json();
-              localStorage.setItem("scheda", json.insertedId);
-              router.push(`/scheda/${json.insertedId}`);
-            }
-          });
+          scheda.timeStamp = new Date();
+          if (scheda._id) {
+            buttonRef.current!.disabled = true;
+            fetch(`/api/scheda/${scheda._id}`, {
+              method: "PUT",
+              body: JSON.stringify(scheda),
+            }).then((response) => {
+              if (!response.ok) {
+                toast("Errore nell'aggiornamento della scheda!", {
+                  type: "error",
+                });
+              } else {
+                toast("Scheda aggiornata con successo!", { type: "success" });
+              }
+              buttonRef.current!.disabled = false;
+            });
+            return;
+          } else {
+            buttonRef.current!.disabled = true;
+            fetch("api/nuova-scheda", {
+              method: "POST",
+              body: JSON.stringify(scheda),
+            }).then(async (response) => {
+              if (!response.ok) {
+                toast("Errore nell'invio della scheda!", { type: "error" });
+              } else {
+                toast("Scheda inviata con successo!", { type: "success" });
+                const { insertedId } = await response.json();
+                localStorage.setItem("scheda", insertedId);
+                setScheda({ ...scheda, _id: insertedId });
+              }
+              buttonRef.current!.disabled = false;
+            });
+          }
         }}
+        ref={buttonRef}
       >
-        Invia Scheda
+        {scheda._id ? "Aggiorna Scheda" : "Invia Scheda"}
       </button>
     </div>
   );
 }
 
-interface StaffProps {
-  nomeStaff: string;
+interface StaffViewerProps {
   onGuessChange: (capi: string[]) => void;
-  schedaInviata: boolean;
+  readonly?: boolean;
+  staff: Staff;
 }
 
-function Staff(props: StaffProps) {
-  const [capi, setCapi] = useState<string[]>([]);
+function StaffViewer(props: StaffViewerProps) {
+  const readonly = props.readonly ?? false;
+  const [capi, setCapi] = useState<string[]>(props.staff.capi);
   useEffect(() => {
     props.onGuessChange(capi);
   }, [capi]);
   const newCapoRef = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-3 w-full text-center items-center bg-white bg-opacity-10 py-10 px-5 h-full justify-center rounded-md">
-      <span className="text-xl">{props.nomeStaff}</span>
+      <span className="text-xl">{props.staff.nomeStaff}</span>
       {capi.map((capo, index) => (
         <input
           className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
@@ -163,11 +194,10 @@ function Staff(props: StaffProps) {
             }
             setCapi([...capi]);
           }}
-          disabled={props.schedaInviata}
+          disabled={readonly}
         />
       ))}
       <input
-        hidden={props.schedaInviata}
         className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"
         placeholder="Scrivi qui per inserire un nuovo capo..."
         onChange={(evt) => {
@@ -176,6 +206,7 @@ function Staff(props: StaffProps) {
         }}
         value=""
         ref={newCapoRef}
+        hidden={readonly}
       />
     </div>
   );
