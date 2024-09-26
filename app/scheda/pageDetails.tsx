@@ -2,41 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Scheda, Staff } from "@/lib/types";
-
-// TODO: aggiungere animali e aggettivi
-// TODO: maschile e femminile
-const animali = [
-  "Tigre",
-  "Squalo",
-  "Lupo",
-  "Lince",
-  "Farfalla",
-  "Fennec",
-  "Panda",
-  "Mantide",
-  "Pipistrello",
-  "Delfino",
-];
-
-const aggettivi = [
-  "Tenace",
-  "Perfido",
-  "Lento",
-  "Alto",
-  "Basso",
-  "Altezzoso",
-  "Sensibile",
-  "Affamato",
-  "Dolorante",
-  "Estroverso",
-];
-
-function getNomeDefault() {
-  return `${animali[Math.floor(Math.random() * animali.length)]} ${
-    aggettivi[Math.floor(Math.random() * aggettivi.length)]
-  }`;
-}
+import { Scheda, SchedaDocument, Staff } from "@/lib/types";
+import generaNomeDiCaccia from "@/utils/nomeDiCacciaGenerator";
 
 interface SchedaPageProps {
   staffs: string[];
@@ -44,9 +11,9 @@ interface SchedaPageProps {
 
 export default function SchedaPage(props: SchedaPageProps) {
   const [loaded, setLoaded] = useState(false);
-  const [scheda, setScheda] = useState<Scheda>(() => ({
-    nome: getNomeDefault(),
-    staffs: props.staffs.map((staff) => ({ nomeStaff: staff, capi: [] })),
+  const [scheda, setScheda] = useState<Scheda | SchedaDocument>(() => ({
+    nome: generaNomeDiCaccia(),
+    staffs: props.staffs.map((staff) => ({ unita: staff, capi: [] })),
   }));
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -60,11 +27,11 @@ export default function SchedaPage(props: SchedaPageProps) {
           return;
         }
         const schedaDb = await response.json();
-        const scheda: Scheda = {
+        const scheda: SchedaDocument = {
           ...schedaDb,
           timeStamp: new Date(schedaDb.timeStamp),
         };
-        if (scheda.timeStamp!.getFullYear() < new Date().getFullYear()) {
+        if (scheda.timeStamp.getFullYear() < new Date().getFullYear()) {
           localStorage.removeItem("scheda");
         } else {
           setScheda(scheda);
@@ -82,6 +49,8 @@ export default function SchedaPage(props: SchedaPageProps) {
         <span className="text-5xl">Caricamento...</span>
       </div>
     );
+
+  console.log(scheda);
 
   return (
     <div className="flex flex-col items-center gap-3 w-screen p-8">
@@ -178,7 +147,7 @@ function StaffViewer(props: StaffViewerProps) {
   const newCapoRef = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-3 w-full text-center items-center bg-white bg-opacity-10 py-10 px-5 h-full justify-center rounded-md">
-      <span className="text-xl">{props.staff.nomeStaff}</span>
+      <span className="text-xl">{props.staff.unita}</span>
       {capi.map((capo, index) => (
         <input
           className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"

@@ -1,4 +1,4 @@
-import { Risultato } from "@/lib/types";
+import { CoCa } from "@/lib/types";
 import { Db, MongoClient } from "mongodb";
 
 let cachedClient: MongoClient | null = null;
@@ -15,20 +15,41 @@ export async function connectToDatabase(): Promise<[Db, MongoClient]> {
   return [cachedDb, cachedClient];
 }
 
-export async function getRisultatiUltimaEdizione(){
-  const schedeCollection = await getRisultati();
-  const risultatoFromDb = (
-    await schedeCollection.find().sort({ availableFrom: -1 }).limit(1).toArray()
-  )[0];
-  const risultato: Risultato = {
-    availableFrom: new Date(risultatoFromDb.availableFrom),
+export async function getRisultati() {
+  const [db] = await connectToDatabase();
+  const staffCollection = db.collection("staff");
+  const today = new Date();
+  const risultatoFromDb = await staffCollection.findOne({
+    passaggi: { $regex: `^${today.getFullYear()}` },
+  });
+  console.log(risultatoFromDb);
+  if (!risultatoFromDb) {
+    return null;
+  }
+  const risultato: CoCa = {
+    passaggi: new Date(risultatoFromDb.passaggi),
     staffs: risultatoFromDb.staffs,
   };
   return risultato;
 }
 
-export async function getRisultati() {
+export async function getStaffPrecedenti() {
   const [db] = await connectToDatabase();
-  const schedeCollection = db.collection("risultati");
-  return schedeCollection;
+  const staffCollection = db.collection("staff");
+  const today = new Date();
+  const risultatoFromDb = await staffCollection
+    .find({
+      passaggi: { $lt: today },
+    })
+    .toArray();
+  if (!risultatoFromDb) {
+    return null;
+  }
+  return risultatoFromDb.map(
+    (risultato) =>
+      ({
+        passaggi: new Date(risultato.passaggi),
+        staffs: risultato.staffs,
+      } as CoCa)
+  );
 }

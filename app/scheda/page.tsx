@@ -1,9 +1,9 @@
-import { getRisultatiUltimaEdizione } from "@/lib/mongodb";
+import { getRisultati } from "@/lib/mongodb";
 import SchedaPage from "./pageDetails";
 
 export default async function SchedaOuterPage() {
-  const staffs = (await getRisultatiUltimaEdizione()).staffs.map(
-    (staff) => staff.nomeStaff
+  const staffs = (await getRisultati()).staffs.map(
+    (staff) => staff.unita
   );
   return <SchedaPage staffs={staffs} />;
 }

@@ -1,13 +1,14 @@
-import { connectToDatabase, getRisultatiUltimaEdizione } from "@/lib/mongodb";
+import { connectToDatabase, getRisultati } from "@/lib/mongodb";
 import { Staff } from "@/lib/types";
 import Link from "next/link";
 
 export default async function Risultati() {
-  const risultato = await getRisultatiUltimaEdizione();
+  const risultato = await getRisultati();
   const today = new Date();
   if (
-    today < risultato.availableFrom &&
-    today.getFullYear() === risultato.availableFrom.getFullYear()
+    !risultato ||
+    today < risultato.passaggi &&
+    today.getFullYear() === risultato.passaggi.getFullYear()
   ) {
     return (
       <div className="flex justify-center items-center h-screen flex-col gap-20">
@@ -42,7 +43,7 @@ interface StaffViewerProps {
 function StaffViewer(props: StaffViewerProps) {
   return (
     <div className="flex flex-col gap-3 w-full text-center items-center bg-white bg-opacity-10 py-5 px-3 h-full justify-center rounded-md">
-      <span className="text-xl">{props.staff.nomeStaff}</span>
+      <span className="text-xl">{props.staff.unita}</span>
       {props.staff.capi.map((capo, index) => (
         <input
           className="p-2 w-full max-w-80 bg-white text-black rounded-sm hover:rounded-lg transition-[border-radius]"

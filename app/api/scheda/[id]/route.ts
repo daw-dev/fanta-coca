@@ -1,4 +1,4 @@
-import { Scheda } from "@/lib/types";
+import { Scheda, SchedaDocument } from "@/lib/types";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
@@ -20,7 +20,7 @@ export async function GET(
   const scheda = {
     ...schedaDb,
     timeStamp: new Date(schedaDb.timeStamp),
-  } as Scheda;
+  } as SchedaDocument;
 
   return NextResponse.json(scheda);
 }
@@ -38,5 +38,16 @@ export async function PUT(
     { _id: new ObjectId(id) },
     { $set: scheda }
   );
+  return NextResponse.json({});
+}
+
+export async function DELETE(
+  _: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+  const [db] = await connectToDatabase();
+  const schedeCollection = db.collection("schede");
+  schedeCollection.deleteOne({ _id: new ObjectId(id) });
   return NextResponse.json({});
 }

@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[60px_1fr_100px] md:grid-rows-[60px_1fr_50px] items-center justify-items-center min-h-screen p-8 pb-5 gap-10 md:px-32 md:py-12 font-[family-name:var(--font-geist-sans)]">
       <span className="text-3xl md:text-5xl row-start-1">
-        Fanta Coca {anno}
+        Fanta CoCa {anno}
       </span>
       <main className="flex flex-col gap-8 row-start-2 items-center w-full justify-center">
         <span>Work is still in progress...</span>

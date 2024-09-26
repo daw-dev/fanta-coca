@@ -1,18 +1,32 @@
 import { ObjectId } from "mongodb";
 
-export interface Scheda {
-  _id?: ObjectId;
-  timeStamp?: Date;
+export type SchedaDocument = {
+  _id: ObjectId;
+  timeStamp: Date;
+} & Scheda;
+
+export type Scheda = {
   nome: string;
   staffs: Staff[];
 }
 
-export interface Staff {
-  nomeStaff: string;
+export type Staff = {
+  unita: string;
   capi: string[];
 }
 
-export interface Risultato {
-  availableFrom: Date;
+export type CoCa = {
+  passaggi: Date;
   staffs: Staff[];
+}
+
+type Genere = "maschile" | "femminile";
+
+export type Nome = {
+  nome: string;
+  genere: Genere;
+}
+
+export type Aggettivo = string | {
+  [key in Genere]: string;
 }
