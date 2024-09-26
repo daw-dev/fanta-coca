@@ -1,10 +1,3 @@
-import { ObjectId } from "mongodb";
-
-export type SchedaDocument = {
-  _id: ObjectId;
-  timeStamp: Date;
-} & Scheda;
-
 export type Scheda = {
   nome: string;
   staffs: Staff[];

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Scheda, SchedaDocument, Staff } from "@/lib/types";
+import { Scheda, Staff } from "@/lib/types";
 import generaNomeDiCaccia from "@/utils/nomeDiCacciaGenerator";
 
 interface SchedaPageProps {
@@ -11,15 +11,16 @@ interface SchedaPageProps {
 
 export default function SchedaPage(props: SchedaPageProps) {
   const [loaded, setLoaded] = useState(false);
-  const [scheda, setScheda] = useState<Scheda | SchedaDocument>(() => ({
+  const [scheda, setScheda] = useState<Scheda>(() => ({
     nome: generaNomeDiCaccia(),
     staffs: props.staffs.map((staff) => ({ unita: staff, capi: [] })),
   }));
+  const [id, setId] = useState<string | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const schedaInviata = localStorage.getItem("scheda");
-    if (schedaInviata) { 
+    if (schedaInviata) {
       fetch(`/api/scheda/${schedaInviata}`).then(async (response) => {
         if (!response.ok) {
           setLoaded(true);
@@ -27,15 +28,17 @@ export default function SchedaPage(props: SchedaPageProps) {
           return;
         }
         const schedaDb = await response.json();
-        const scheda: SchedaDocument = {
-          ...schedaDb,
-          timeStamp: new Date(schedaDb.timeStamp),
+        const timeStamp = new Date(schedaDb.timeStamp);
+        console.log(schedaDb);
+        const scheda: Scheda = {
+          ...schedaDb
         };
-        if (scheda.timeStamp.getFullYear() < new Date().getFullYear()) {
+        if (timeStamp.getFullYear() < new Date().getFullYear()) {
           localStorage.removeItem("scheda");
         } else {
           setScheda(scheda);
         }
+        setId(schedaInviata)
         setLoaded(true);
       });
     } else {
@@ -49,7 +52,6 @@ export default function SchedaPage(props: SchedaPageProps) {
         <span className="text-5xl">Caricamento...</span>
       </div>
     );
-
 
   return (
     <div className="flex flex-col items-center gap-3 w-screen p-8">
@@ -88,10 +90,9 @@ export default function SchedaPage(props: SchedaPageProps) {
             });
             return;
           }
-          scheda.timeStamp = new Date();
-          if (scheda._id) {
+          if (id) {
             buttonRef.current!.disabled = true;
-            fetch(`/api/scheda/${scheda._id}`, {
+            fetch(`/api/scheda/${id}`, {
               method: "PUT",
               body: JSON.stringify(scheda),
             }).then((response) => {
@@ -117,7 +118,7 @@ export default function SchedaPage(props: SchedaPageProps) {
                 toast("Scheda inviata con successo!", { type: "success" });
                 const { insertedId } = await response.json();
                 localStorage.setItem("scheda", insertedId);
-                setScheda({ ...scheda, _id: insertedId });
+                setId(insertedId);
               }
               buttonRef.current!.disabled = false;
             });
@@ -125,7 +126,7 @@ export default function SchedaPage(props: SchedaPageProps) {
         }}
         ref={buttonRef}
       >
-        {scheda._id ? "Aggiorna Scheda" : "Invia Scheda"}
+        {id ? "Aggiorna Scheda" : "Invia Scheda"}
       </button>
     </div>
   );

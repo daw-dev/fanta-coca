@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
   const scheda = await request.json();
   const isValid = validate(scheda);
 
-  if (!isValid)
-    return NextResponse.json(
-      { message: "the body has not a valid structure" },
-      { status: 400 }
-    );
+  // if (!isValid)
+  //   return NextResponse.json(
+  //     { message: "the body has not a valid structure" },
+  //     { status: 400 }
+  //   );
   
   const validScheda = scheda as Scheda;
   

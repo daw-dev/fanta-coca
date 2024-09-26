@@ -1,4 +1,3 @@
-import { SchedaDocument } from "@/lib/types";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,12 +16,7 @@ export async function GET(
       { status: 404, statusText: "scheda non trovata" }
     );
 
-  const scheda = {
-    ...schedaDb,
-    timeStamp: new Date(schedaDb.timeStamp),
-  } as SchedaDocument;
-
-  return NextResponse.json(scheda);
+  return NextResponse.json(schedaDb);
 }
 
 export async function PUT(
