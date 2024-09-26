@@ -1,4 +1,4 @@
-import { Scheda, SchedaDocument } from "@/lib/types";
+import { SchedaDocument } from "@/lib/types";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";

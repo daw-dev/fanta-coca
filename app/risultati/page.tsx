@@ -1,4 +1,4 @@
-import { connectToDatabase, getRisultati } from "@/lib/mongodb";
+import { getRisultati } from "@/lib/mongodb";
 import { Staff } from "@/lib/types";
 import Link from "next/link";
 
