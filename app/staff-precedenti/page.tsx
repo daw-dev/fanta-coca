@@ -6,7 +6,7 @@ export default async function StaffPrecedenti() {
   if(!staffPrecedenti) {
     return (
       <div>
-        <span>C'è stato un problema con il caricamento delle staff precedenti</span>
+        <span>C&apos;è stato un problema con il caricamento delle staff precedenti</span>
       </div>
     );
   }
