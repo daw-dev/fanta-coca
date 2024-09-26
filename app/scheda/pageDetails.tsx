@@ -50,7 +50,6 @@ export default function SchedaPage(props: SchedaPageProps) {
       </div>
     );
 
-  console.log(scheda);
 
   return (
     <div className="flex flex-col items-center gap-3 w-screen p-8">

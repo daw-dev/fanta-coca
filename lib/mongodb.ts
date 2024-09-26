@@ -22,7 +22,6 @@ export async function getRisultati() {
   const risultatoFromDb = await staffCollection.findOne({
     passaggi: { $regex: `^${today.getFullYear()}` },
   });
-  console.log(risultatoFromDb);
   if (!risultatoFromDb) {
     return null;
   }
