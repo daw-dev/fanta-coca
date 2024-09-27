@@ -108,7 +108,7 @@ export default function SchedaPage(props: SchedaPageProps) {
             return;
           } else {
             buttonRef.current!.disabled = true;
-            fetch("api/nuova-scheda", {
+            fetch("api/scheda", {
               method: "POST",
               body: JSON.stringify(scheda),
             }).then(async (response) => {

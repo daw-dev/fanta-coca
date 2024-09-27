@@ -15,6 +15,9 @@ export default function Home() {
         <Link href={"risultati"} className="cool-button">
           Guarda i risultati
         </Link>
+        <Link href={"feedback"} className="cool-button">
+          Invia un feedback
+        </Link>
       </main>
       <footer className="row-start-3 flex gap-4 md:gap-10 flex-wrap items-center justify-center flex-col md:flex-row">
         <span className="flex gap-x-2 flex-col md:flex-row items-center justify-center">

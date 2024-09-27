@@ -2,13 +2,18 @@ import { getRisultati } from "@/lib/mongodb";
 import { Staff } from "@/lib/types";
 import Link from "next/link";
 
-export default async function Risultati() {
+export default async function Risultati({
+  searchParams,
+}: {
+  searchParams: { force?: string };
+}) {
   const risultato = await getRisultati();
   const today = new Date();
+  const forceEnabled = "force" in searchParams;
   if (
     !risultato ||
-    today < risultato.passaggi &&
-    today.getFullYear() === risultato.passaggi.getFullYear()
+    (today < risultato.passaggi &&
+      today.getFullYear() === risultato.passaggi.getFullYear() && !forceEnabled)
   ) {
     return (
       <div className="flex justify-center items-center h-screen flex-col gap-20">
