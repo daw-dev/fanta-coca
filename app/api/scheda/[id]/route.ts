@@ -28,10 +28,8 @@ export async function PUT(
   const schedeCollection = db.collection("schede");
   const scheda = await request.json();
   scheda._id = new ObjectId(id);
-  schedeCollection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: scheda }
-  );
+  scheda.lastModified = new Date(scheda.lastModified);
+  schedeCollection.updateOne({ _id: new ObjectId(id) }, { $set: scheda });
   return NextResponse.json({});
 }
 
@@ -42,6 +40,7 @@ export async function DELETE(
   const { id } = params;
   const [db] = await connectToDatabase();
   const schedeCollection = db.collection("schede");
-  schedeCollection.deleteOne({ _id: new ObjectId(id) });
-  return NextResponse.json({});
+  return NextResponse.json(
+    await schedeCollection.deleteOne({ _id: new ObjectId(id) })
+  );
 }

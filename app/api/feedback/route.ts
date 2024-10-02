@@ -6,3 +6,8 @@ export async function POST(request: NextRequest) {
   const [db] = await connectToDatabase();
   return NextResponse.json(await db.collection("feedback").insertOne({feedback, timeStamp: new Date()}));
 }
+
+export async function GET() {
+  const [db] = await connectToDatabase();
+  return NextResponse.json(await db.collection("feedback").find().toArray());
+}

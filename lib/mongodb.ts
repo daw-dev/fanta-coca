@@ -19,14 +19,16 @@ export async function getRisultati() {
   const [db] = await connectToDatabase();
   const staffCollection = db.collection("staff");
   const today = new Date();
+  const twoMonthAgo = new Date();
+  twoMonthAgo.setMonth(twoMonthAgo.getMonth() - 2);
   const risultatoFromDb = await staffCollection.findOne({
-    passaggi: { $regex: `^${today.getFullYear()}` },
+    passaggi: { $gte: twoMonthAgo },
   });
   if (!risultatoFromDb) {
     return null;
   }
   const risultato: CoCa = {
-    passaggi: new Date(risultatoFromDb.passaggi),
+    passaggi: risultatoFromDb.passaggi,
     staffs: risultatoFromDb.staffs,
   };
   return risultato;
@@ -40,6 +42,7 @@ export async function getStaffPrecedenti() {
     .find({
       passaggi: { $lt: today },
     })
+    .sort({ passaggi: -1 })
     .toArray();
   if (!risultatoFromDb) {
     return null;

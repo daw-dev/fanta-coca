@@ -31,14 +31,14 @@ export default function SchedaPage(props: SchedaPageProps) {
         const timeStamp = new Date(schedaDb.timeStamp);
         console.log(schedaDb);
         const scheda: Scheda = {
-          ...schedaDb
+          ...schedaDb,
         };
         if (timeStamp.getFullYear() < new Date().getFullYear()) {
           localStorage.removeItem("scheda");
         } else {
           setScheda(scheda);
         }
-        setId(schedaInviata)
+        setId(schedaInviata);
         setLoaded(true);
       });
     } else {
@@ -81,33 +81,73 @@ export default function SchedaPage(props: SchedaPageProps) {
           value={scheda.nome}
         />
       </span>
-      <button
-        className="cool-button md:col-span-2 lg:col-span-3"
-        onClick={() => {
-          if (scheda.staffs.some((guess) => guess.capi.length === 0)) {
-            toast("Inserire almeno un capo per ogni staff!", {
-              type: "error",
-            });
-            return;
-          }
-          if (id) {
-            buttonRef.current!.disabled = true;
-            fetch(`/api/scheda/${id}`, {
-              method: "PUT",
-              body: JSON.stringify(scheda),
-            }).then((response) => {
-              if (!response.ok) {
-                toast("Errore nell'aggiornamento della scheda!", {
+      {id ? (
+        <div className="w-full flex justify-center gap-4">
+          <button
+            className="cool-button"
+            onClick={() => {
+              if (scheda.staffs.some((guess) => guess.capi.length === 0)) {
+                toast("Inserire almeno un capo per ogni staff!", {
                   type: "error",
                 });
-              } else {
-                toast("Scheda aggiornata con successo!", { type: "success" });
+                return;
               }
-              buttonRef.current!.disabled = false;
-            });
-            return;
-          } else {
+              buttonRef.current!.disabled = true;
+              scheda.lastModified = new Date();
+              fetch(`/api/scheda/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(scheda),
+              }).then((response) => {
+                if (!response.ok) {
+                  toast("Errore nell'aggiornamento della scheda!", {
+                    type: "error",
+                  });
+                } else {
+                  toast("Scheda aggiornata con successo!", { type: "success" });
+                }
+                buttonRef.current!.disabled = false;
+              });
+              return;
+            }}
+            ref={buttonRef}
+          >
+            Aggiorna Scheda
+          </button>
+          <button
+            className="cool-button"
+            onClick={() => {
+              buttonRef.current!.disabled = true;
+              fetch(`/api/scheda/${id}`, {
+                method: "DELETE",
+              }).then((response) => {
+                if (!response.ok) {
+                  toast("Errore nell'eliminazione della scheda!", {
+                    type: "error",
+                  });
+                } else {
+                  toast("Scheda eliminata con successo!", { type: "success" });
+                  localStorage.removeItem("scheda");
+                  setId(null);
+                }
+                buttonRef.current!.disabled = false;
+              });
+            }}
+          >
+            Elimina Scheda
+          </button>
+        </div>
+      ) : (
+        <button
+          className="cool-button md:col-span-2 lg:col-span-3"
+          onClick={() => {
+            if (scheda.staffs.some((guess) => guess.capi.length === 0)) {
+              toast("Inserire almeno un capo per ogni staff!", {
+                type: "error",
+              });
+              return;
+            }
             buttonRef.current!.disabled = true;
+            scheda.lastModified = new Date();
             fetch("api/scheda", {
               method: "POST",
               body: JSON.stringify(scheda),
@@ -122,12 +162,12 @@ export default function SchedaPage(props: SchedaPageProps) {
               }
               buttonRef.current!.disabled = false;
             });
-          }
-        }}
-        ref={buttonRef}
-      >
-        {id ? "Aggiorna Scheda" : "Invia Scheda"}
-      </button>
+          }}
+          ref={buttonRef}
+        >
+          Invia Scheda
+        </button>
+      )}
     </div>
   );
 }

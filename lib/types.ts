@@ -1,5 +1,6 @@
 export type Scheda = {
   nome: string;
+  lastModified?: Date;
   staffs: Staff[];
 }
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Scheda",
+  "description": "Schema for the scheda object",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string"
+    },
+    "lastModified": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "staffs": {
+      "type": "array",
+      "items": {
+        "$ref": "staff.json"
+      }
+    }
+  },
+  "required": ["nome", "staffs"]
+}
